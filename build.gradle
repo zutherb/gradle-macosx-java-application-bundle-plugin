@@ -1,4 +1,5 @@
 group "com.github.zutherb.gradle"
+//name  "mac-app-bundle"
 
 apply plugin: 'groovy'
 apply plugin: 'idea'

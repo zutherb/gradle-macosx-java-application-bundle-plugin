@@ -31,7 +31,7 @@
 #define JAVA_LAUNCH_ERROR "JavaLaunchError"
 
 #define JVM_RUNTIME_KEY "JVMRuntime"
-#define JVM_MAIN_CLASS_NAME_KEY "JVMMainClassName"
+#define JVM_MAIN_CLASS_NAME_KEY "MainClass"
 #define JVM_OPTIONS_KEY "JVMOptions"
 #define JVM_ARGUMENTS_KEY "JVMArguments"
 
@@ -86,6 +86,9 @@ int launch(char *commandName) {
     // Get the main bundle's info dictionary
     NSDictionary *infoDictionary = [mainBundle infoDictionary];
 
+    // Get the java bundle's info dictionary
+    NSDictionary *javaDictionary = [[mainBundle infoDictionary] objectForKey:@"Java"];
+
     // Locate the JLI_Launch() function
     NSString *runtime = [infoDictionary objectForKey:@JVM_RUNTIME_KEY];
 
@@ -111,7 +114,9 @@ int launch(char *commandName) {
     }
 
     // Get the main class name
-    NSString *mainClassName = [infoDictionary objectForKey:@JVM_MAIN_CLASS_NAME_KEY];
+    NSString *mainClassName = [javaDictionary objectForKey:@JVM_MAIN_CLASS_NAME_KEY];
+    NSLog( @"Java MainClassName is: %@", mainClassName );
+
     if (mainClassName == nil) {
         [[NSException exceptionWithName:@JAVA_LAUNCH_ERROR
             reason:NSLocalizedString(@"MainClassNameRequired", @UNSPECIFIED_ERROR)

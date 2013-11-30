@@ -12,8 +12,8 @@ class CopyJavaAppLauncherTask extends DefaultTask {
         dest.parentFile.mkdirs()
         def outStream = new BufferedOutputStream(new FileOutputStream(dest))
         def buf = new byte[1024]
-        def inStream = this.getClass().getClassLoader().getResourceAsStream("com/github/zuther/gradle/macAppBundle/JavaAppLauncher")
-        if (inStream == null) throw new RuntimeException("Can't find resource for JavaApplicationStub in jar")
+        def inStream = this.getClass().getClassLoader().getResourceAsStream("com/github/zutherb/gradle/mapAppBundle/JavaAppLauncher")
+        if (inStream == null) throw new RuntimeException("Can't find resource for JavaAppLauncher in jar")
         int numRead = inStream.read(buf)
         while (numRead > 0) {
             outStream.write(buf, 0, numRead)

@@ -20,16 +20,16 @@ class MacAppBundlePluginExtension implements Serializable {
         if (jvmVersion == null) jvmVersion = project.targetCompatibility.toString()+"+"
         if (dmgOutputDir == null) dmgOutputDir = "${->project.distsDirName}"
     }
-    
+
     /** The command SetFile, usually located in /usr/bin, but might be in /Developer/Tools,
      *  that sets the magic bit on a .app directory to turn it into a OSX Application.
      *  This does not seem to be required to generate a recognizable .app application.
      */
     String setFileCmd = "/usr/bin/SetFile"
-    
+
     /** The output directory for building the app. WARNING: Replaced by new appOutputDir. */
     String outputDir = null
-    
+
     @Deprecated
     def setOutputDir(String val) {
         System.err.println("outputDir is deprecated, please use appOutputDir or dmgOutputDir")
@@ -39,54 +39,54 @@ class MacAppBundlePluginExtension implements Serializable {
     def getOutputDir() {
         throw new InvalidUserDataException("outputDir is deprecated, please use appOutputDir");
     }
-    
+
     /** The output directory for building the app, relative to the build directory. */
     String appOutputDir = "macApp"
-    
+
     /** The output directory for building the dmg, relative to the build directory. */
     String dmgOutputDir
 
-    /** The initial class to start the application, must contain a public static void main method. */ 
+    /** The initial class to start the application, must contain a public static void main method. */
     String mainClassName
-    
+
     /** Creator code, issued by Apple. Four question marks is the default if no code has been issued. */
     String creatorCode = '????'
-    
+
     /** Icon for this application, probably needs to be a '.icns' file. Defaults to the Apple GenericApp.icns. */
     String icon = 'GenericApp.icns'
-    
+
     /** The JVM version needed. Can append a + to set a minimum. */
     String jvmVersion
-    
+
     /** The background image for the DMG. */
     String backgroundImage
-    
+
     /** The name of the application, without the .app extension */
     String appName
-    
+
     /** The name of the volume */
     String volumeName
-    
+
     /** The base name of the dmg file, without the .dmg extension. */
     String dmgName
-    
+
     /** Map of properties to be put in the Properties dict inside the Java dict. Usage should be like
         javaProperties.put("apple.laf.useScreenMenuBar", "true") */
     Map javaProperties = ["apple.laf.useScreenMenuBar" : "true"]
-    
+
     /** Map of extra java key-value pairs to be put in the java level dict inside Info.plist. Usage should be like
         javaExtras.put("mykey", "myvalue") */
     Map javaExtras = [:]
-    
+
     /** Map of extra bundle key-value pairs to be put in the top level dict inside Info.plist. Usage should be like
         bundleExtras.put("mykey", "myvalue") */
     Map bundleExtras = [:]
-    
-    /** Should the app use the Mac default of a single screen menubar (true) or a menubar per window (false). 
+
+    /** Should the app use the Mac default of a single screen menubar (true) or a menubar per window (false).
      * Default is true. Deprecated, use javaProperties.put("apple.laf.useScreenMenuBar", "true")
      */
     boolean useScreenMenuBar = true
-    
+
     @Deprecated
     def setUseScreenMenuBar(String val) {
         System.err.println("useScreenMenuBar is deprecated, please use javaProperties.[\"apple.laf.useScreenMenuBar\"]")
@@ -96,31 +96,31 @@ class MacAppBundlePluginExtension implements Serializable {
     def getUseScreenMenuBar() {
         throw new InvalidUserDataException("useScreenMenuBar is deprecated, please use javaProperties.[\"apple.laf.useScreenMenuBar\"]");
     }
-    
+
     /** The name of the executable run by the bundle.
      * Default is 'JavaApplicationStub'.
      */
     String bundleExecutable = 'JavaAppLauncher'
-    
+
     /** BundleAllowMixedLocalizations, default is true */
     boolean bundleAllowMixedLocalizations = true
-    
+
     /** undlePackageType, default is 'APPL' */
     String bundlePackageType = 'APPL'
-    
+
     /** BundleInfoDictionaryVersion, default is '6.0' */
     String bundleInfoDictionaryVersion = '6.0'
-    
+
     /** The development region.
      * Default is 'English'.
      */
     String bundleDevelopmentRegion = 'English'
-    
+
     /** WARNING: Deprecated, use bundleProperties instead. Any extra xml that should be included in the info.plist file. Will be added
      *  to the bottom inside the outermost <dict> element.
      */
     String extras = ""
-    
+
     @Deprecated
     def setExtras(String val) {
         System.err.println("extras is deprecated, please use the bundleExtras map instead.")
@@ -133,24 +133,24 @@ class MacAppBundlePluginExtension implements Serializable {
         }
         return extras
     }
-    
+
     /** for codesign */
     String certIdentity = null
-    
+
     /** for codesign */
     String codeSignCmd = "codesign"
-    
+
     /** for codesign */
     String keyChain = null
-    
+
     public File getPlistFileForProject(Project project) {
         return project.file("${project.buildDir}/${appOutputDir}/${appName}.app/Contents/Info.plist")
     }
-    
+
     public File getPkgInfoFileForProject(Project project) {
         return project.file("${project.buildDir}/${appOutputDir}/${appName}.app/Contents/PkgInfo")
     }
-    
+
 
     @Override
     public int hashCode() {
@@ -283,7 +283,7 @@ class MacAppBundlePluginExtension implements Serializable {
                 return false;
         } else if (!keyChain.equals(other.keyChain))
             return false;
-            
+
         if (javaProperties == null) {
             if (other.javaProperties != null)
                 return false;
@@ -306,6 +306,6 @@ class MacAppBundlePluginExtension implements Serializable {
             return false;
         return true;
     }
-    
-    
+
+
 }

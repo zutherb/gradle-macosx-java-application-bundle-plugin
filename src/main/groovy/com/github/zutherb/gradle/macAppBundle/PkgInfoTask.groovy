@@ -1,16 +1,12 @@
 package com.github.zutherb.gradle.macAppBundle
 
-import java.io.File
-
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
-
-class PkgInfoTask  extends DefaultTask {
+class PkgInfoTask extends DefaultTask {
 
     static final String APPL_LINE = 'APPL';
-
 
     @OutputFile
     File getPkgInfoFile() {
