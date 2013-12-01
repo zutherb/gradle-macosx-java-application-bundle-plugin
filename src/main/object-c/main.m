@@ -30,15 +30,17 @@
 
 #define JAVA_LAUNCH_ERROR "JavaLaunchError"
 
-#define JVM_RUNTIME_KEY "Runtime"
+#define JVM_RUNTIME_KEY         "Runtime"
 #define JVM_MAIN_CLASS_NAME_KEY "MainClass"
-#define JVM_MAIN_CLASSPATH_KEY "ClassPath"
-#define JVM_OPTIONS_KEY "VMOptions"
-#define JVM_ARGUMENTS_KEY "Arguments"
+#define JVM_MAIN_CLASSPATH_KEY  "ClassPath"
+#define JVM_OPTIONS_KEY         "VMOptions"
+#define JVM_ARGUMENTS_KEY       "Arguments"
 
 #define UNSPECIFIED_ERROR "An unknown error occurred."
 
-#define APP_ROOT_PREFIX "$APP_ROOT"
+#define APP_ROOT_PREFIX  "$APP_ROOT"
+#define JAVA_ROOT_PREFIX "$JAVAROOT"
+#define PLUGIN_ROOT_PREFIX "$PLUGINROOT"
 
 #define LIBJLI_DYLIB "/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home/lib/jli/libjli.dylib"
 
@@ -80,6 +82,8 @@ int main(int argc, char *argv[]) {
 int launch(char *commandName) {
     // Get the main bundle
     NSBundle *mainBundle = [NSBundle mainBundle];
+    NSString *mainBundlePath = [mainBundle bundlePath];
+    NSString *javaPath = [mainBundlePath stringByAppendingString:@"/Contents/Resources/Java"];
 
     // Set the working directory to the user's home directory
     chdir([NSHomeDirectory() UTF8String]);
@@ -90,16 +94,17 @@ int launch(char *commandName) {
     // Get the java bundle's info dictionary
     NSDictionary *javaDictionary = [[mainBundle infoDictionary] objectForKey:@"Java"];
 
-    // Locate the JLI_Launch() function
-    NSString *runtime = [infoDictionary objectForKey:@JVM_RUNTIME_KEY];
+    NSString *runtime = [[javaDictionary objectForKey:@JVM_RUNTIME_KEY] stringByReplacingOccurrencesOfString:@PLUGIN_ROOT_PREFIX withString:[[NSBundle mainBundle] builtInPlugInsPath]];
+    NSLog(@"Java Runtime is: %@", runtime);
 
     const char *libjliPath = NULL;
     if (runtime != nil) {
-        NSString *runtimePath = [[[NSBundle mainBundle] builtInPlugInsPath] stringByAppendingPathComponent:runtime];
-        libjliPath = [[runtimePath stringByAppendingPathComponent:@"Contents/Home/jre/lib/jli/libjli.dylib"] fileSystemRepresentation];
+        NSString *runtimePath = [runtime stringByAppendingPathComponent:@"/lib/jli/libjli.dylib"];
+        libjliPath = [runtimePath fileSystemRepresentation];
     } else {
         libjliPath = LIBJLI_DYLIB;
     }
+    NSLog(@"Java Runtime Path is: %@", [NSString stringWithCString:libjliPath encoding:NSASCIIStringEncoding]);
 
     void *libJLI = dlopen(libjliPath, RTLD_LAZY);
 
@@ -116,7 +121,7 @@ int launch(char *commandName) {
 
     // Get the main class name
     NSString *mainClassName = [javaDictionary objectForKey:@JVM_MAIN_CLASS_NAME_KEY];
-    NSLog(@"Java MainClassName is: %@", mainClassName);
+    NSLog(@"Java MainClass is: %@", mainClassName);
 
     if (mainClassName == nil) {
         [[NSException exceptionWithName:@JAVA_LAUNCH_ERROR
@@ -125,17 +130,15 @@ int launch(char *commandName) {
     }
 
     // Set the class path
-    NSString *mainBundlePath = [mainBundle bundlePath];
-    NSString *javaPath = [mainBundlePath stringByAppendingString:@"/Contents/Resources/Java"];
-    
     NSMutableString *classPath = [NSMutableString stringWithFormat:@"-Djava.class.path=%@/Classes", javaPath];
 
     NSArray *jars = [javaDictionary objectForKey:@JVM_MAIN_CLASSPATH_KEY];
     for (NSString *jar in jars) {
         if ([jar hasSuffix:@".jar"]) {
-            [classPath appendFormat:@":%@/%@", javaPath, jar];
+            [classPath appendFormat:@":%@", [jar stringByReplacingOccurrencesOfString:@JAVA_ROOT_PREFIX withString:javaPath]];
         }
     }
+    NSLog(@"Java ClassPath is: %@", classPath);
 
     // Set the library path
     NSString *libraryPath = [NSString stringWithFormat:@"-Djava.library.path=%@/Contents/MacOS", mainBundlePath];

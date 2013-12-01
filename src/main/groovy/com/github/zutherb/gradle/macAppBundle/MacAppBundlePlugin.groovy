@@ -117,7 +117,7 @@ class MacAppBundlePlugin implements Plugin<Project> {
         task.description = "Copies the java runtime into the Contents/Resources directory."
         task.group = GROUP
         task.from "${-> JRE_HOME}"
-        task.into "${-> project.buildDir}/${-> project.macAppBundle.appOutputDir}/${-> project.macAppBundle.appName}.app/Contents/Resources/Jre"
+        task.into "${-> project.buildDir}/${-> project.macAppBundle.appOutputDir}/${-> project.macAppBundle.appName}.app/Contents/PlugIns/Jre"
         task.exclude "bin/",
                 "lib/deploy/",
                 "lib/deploy.jar",

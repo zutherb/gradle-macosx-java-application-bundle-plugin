@@ -71,7 +71,7 @@ class GenerateInfoPlistTask  extends DefaultTask {
                         }
                     }
                     key('Runtime')
-                    string('$JAVAROOT/Jre')
+                    string('$PLUGINROOT/Jre')
                 }
                 extension.bundleExtras.each { k, v->
                     key("$k")
