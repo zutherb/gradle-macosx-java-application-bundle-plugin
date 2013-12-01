@@ -20,7 +20,8 @@ class MacAppBundlePlugin implements Plugin<Project> {
     static final String TASK_PKG_INFO_GENERATE_NAME = "generatePkgInfo"
 
     static final String TASK_LIB_COPY_NAME = "copyToResourcesJava"
-    static final String TASK_COPY_STUB_NAME = "copyStub"
+    static final String TASK_COPY_JAVA_APP_LAUNCHER_NAME = "copyJavaAppLauncher"
+    static final String TASK_COPY_JAVA_RUNTIME = "copyJavaRuntime"
     static final String TASK_COPY_ICON_NAME = "copyIcon"
     static final String TASK_SET_FILE_NAME = "runSetFile"
     static final String TASK_CREATE_APP_NAME = "createApp"
@@ -93,7 +94,7 @@ class MacAppBundlePlugin implements Plugin<Project> {
     }
 
     private static Task addCopyJavaAppLauncherTask(Project project) {
-        Task task = project.tasks.create(TASK_COPY_STUB_NAME, CopyJavaAppLauncherTask)
+        Task task = project.tasks.create(TASK_COPY_JAVA_APP_LAUNCHER_NAME, CopyJavaAppLauncherTask)
         task.description = "Copies the JavaAppLauncher into the Contents/MacOS directory."
         task.group = GROUP
         task.doLast { ant.chmod(dir: project.file("${project.buildDir}/${project.macAppBundle.appOutputDir}/${-> project.macAppBundle.appName}.app/Contents/MacOS"), perm: "755", includes: "*") }

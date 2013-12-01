@@ -1,5 +1,4 @@
 group "com.github.zutherb.gradle"
-//name  "mac-app-bundle"
 
 apply plugin: 'groovy'
 apply plugin: 'idea'
@@ -17,15 +16,16 @@ dependencies {
 task compileJavaAppLuncher(type: Exec) {
     def javaAppLuncherDir = "${buildDir}/resources/main/com/github/zutherb/gradle/mapAppBundle"
     mkdir javaAppLuncherDir
-    executable "gcc"
-    args    "-I", "/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/include",
-            "-I", "/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/include/darwin",
-            "-o", "${javaAppLuncherDir}/JavaAppLauncher",
-            "-framework", "Cocoa",
-            "-arch", "x86_64",
-            "-isysroot", "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk",
-            "-mmacosx-version-min=10.7",
-            "/Users/berndzuther/develop/workspace/gradle-macappbundle/src/main/object-c/main.m"
+    executable  "gcc"
+    args        "-I", "/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/include",
+                "-I", "/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home/include/darwin",
+                "-o", "${javaAppLuncherDir}/JavaAppLauncher",
+                "-framework", "Cocoa",
+                "-arch", "x86_64",
+                "-isysroot", "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk",
+                "-mmacosx-version-min=10.7",
+                "${projectDir}/src/main/object-c/main.m",
+                "-v"
 }
 
 tasks.processResources.dependsOn(compileJavaAppLuncher)

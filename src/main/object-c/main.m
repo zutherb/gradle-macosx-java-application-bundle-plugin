@@ -32,8 +32,8 @@
 
 #define JVM_RUNTIME_KEY "JVMRuntime"
 #define JVM_MAIN_CLASS_NAME_KEY "MainClass"
-#define JVM_OPTIONS_KEY "JVMOptions"
-#define JVM_ARGUMENTS_KEY "JVMArguments"
+#define JVM_OPTIONS_KEY "VMOptions"
+#define JVM_ARGUMENTS_KEY "Arguments"
 
 #define UNSPECIFIED_ERROR "An unknown error occurred."
 
@@ -147,13 +147,13 @@ int launch(char *commandName) {
     NSString *libraryPath = [NSString stringWithFormat:@"-Djava.library.path=%@/Contents/MacOS", mainBundlePath];
 
     // Get the VM options
-    NSArray *options = [infoDictionary objectForKey:@JVM_OPTIONS_KEY];
+    NSArray *options = [javaDictionary objectForKey:@JVM_OPTIONS_KEY];
     if (options == nil) {
         options = [NSArray array];
     }
 
     // Get the application arguments
-    NSArray *arguments = [infoDictionary objectForKey:@JVM_ARGUMENTS_KEY];
+    NSArray *arguments = [javaDictionary objectForKey:@JVM_ARGUMENTS_KEY];
     if (arguments == nil) {
         arguments = [NSArray array];
     }
