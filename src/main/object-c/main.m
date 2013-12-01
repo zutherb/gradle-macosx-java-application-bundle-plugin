@@ -30,8 +30,9 @@
 
 #define JAVA_LAUNCH_ERROR "JavaLaunchError"
 
-#define JVM_RUNTIME_KEY "JVMRuntime"
+#define JVM_RUNTIME_KEY "Runtime"
 #define JVM_MAIN_CLASS_NAME_KEY "MainClass"
+#define JVM_MAIN_CLASSPATH_KEY "ClassPath"
 #define JVM_OPTIONS_KEY "VMOptions"
 #define JVM_ARGUMENTS_KEY "Arguments"
 
@@ -115,7 +116,7 @@ int launch(char *commandName) {
 
     // Get the main class name
     NSString *mainClassName = [javaDictionary objectForKey:@JVM_MAIN_CLASS_NAME_KEY];
-    NSLog( @"Java MainClassName is: %@", mainClassName );
+    NSLog(@"Java MainClassName is: %@", mainClassName);
 
     if (mainClassName == nil) {
         [[NSException exceptionWithName:@JAVA_LAUNCH_ERROR
@@ -129,17 +130,10 @@ int launch(char *commandName) {
     
     NSMutableString *classPath = [NSMutableString stringWithFormat:@"-Djava.class.path=%@/Classes", javaPath];
 
-    NSFileManager *defaultFileManager = [NSFileManager defaultManager];
-    NSArray *javaDirectoryContents = [defaultFileManager contentsOfDirectoryAtPath:javaPath error:nil];
-    if (javaDirectoryContents == nil) {
-        [[NSException exceptionWithName:@JAVA_LAUNCH_ERROR
-            reason:NSLocalizedString(@"JavaDirectoryNotFound", @UNSPECIFIED_ERROR)
-            userInfo:nil] raise];
-    }
-
-    for (NSString *file in javaDirectoryContents) {
-        if ([file hasSuffix:@".jar"]) {
-            [classPath appendFormat:@":%@/%@", javaPath, file];
+    NSArray *jars = [javaDictionary objectForKey:@JVM_MAIN_CLASSPATH_KEY];
+    for (NSString *jar in jars) {
+        if ([jar hasSuffix:@".jar"]) {
+            [classPath appendFormat:@":%@/%@", javaPath, jar];
         }
     }
 

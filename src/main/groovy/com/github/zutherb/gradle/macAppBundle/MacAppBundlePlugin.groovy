@@ -12,6 +12,8 @@ import org.gradle.api.tasks.Sync
 
 class MacAppBundlePlugin implements Plugin<Project> {
 
+    static final String JRE_HOME = '/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home/';
+
     static final String PLUGIN_NAME = "macAppBundle"
     static final String GROUP = PLUGIN_NAME
 
@@ -33,38 +35,36 @@ class MacAppBundlePlugin implements Plugin<Project> {
         MacAppBundlePluginExtension pluginExtension = new MacAppBundlePluginExtension()
         project.extensions.macAppBundle = pluginExtension
 
-        Task configTask = addConfigurationTask(project)
-        Task plistTask = addCreateInfoPlistTask(project)
+        Task configTask = configurationTask(project)
+        Task plistTask = infoPlistTask(project)
         plistTask.dependsOn(configTask)
-        Task copyTask = addCopyToLibTask(project)
+        Task copyTask = copyToLibTask(project)
         copyTask.dependsOn(configTask)
-        Task stubTask = addCopyJavaAppLauncherTask(project)
+        Task stubTask = copyJavaAppLauncherTask(project)
         stubTask.dependsOn(configTask)
-        Task copyIconTask = addCopyIconTask(project)
+        Task copyIconTask = copyIconTask(project)
         copyIconTask.dependsOn(configTask)
-        Task pkgInfoTask = createPkgInfoTask(project)
+        Task copyJavaRuntimeTask = copyJavaRuntimeTask(project)
+        copyJavaRuntimeTask.dependsOn(configTask)
+        Task pkgInfoTask = pkgInfoTask(project)
         pkgInfoTask.dependsOn(configTask)
-        Task createAppTask = addCreateAppTask(project)
+        Task createAppTask = appTask(project)
         createAppTask.dependsOn(plistTask)
         createAppTask.dependsOn(copyTask)
+        createAppTask.dependsOn(copyJavaRuntimeTask)
         createAppTask.dependsOn(stubTask)
         createAppTask.dependsOn(copyIconTask)
         createAppTask.dependsOn(pkgInfoTask)
-        Task setFileTask = addSetFileTask(project)
-        setFileTask.dependsOn(createAppTask)
-        /* I think setfile is not required for a .app to be run on osx.
-         * Leaving the task in, but not depended on by anything else. If
-         * SetFile is needed, then switch the above depends to
-         createAppTask.dependsOn(setFileTask)
-         */
-        Task codeSignTask = addCodeSignTask(project)
+        Task setFileTask = setFileTask(project)
+        createAppTask.dependsOn(setFileTask)
+        Task codeSignTask = codeSignTask(project)
         codeSignTask.dependsOn(createAppTask)
-        Task dmgTask = addDmgTask(project)
+        Task dmgTask = dmgTask(project)
         dmgTask.dependsOn(createAppTask)
         project.getTasksByName("assemble", true).each { t -> t.dependsOn(dmgTask) }
     }
 
-    private static Task addConfigurationTask(Project project) {
+    private static Task configurationTask(Project project) {
         Task task = project.tasks.create(TASK_CONFIGURE_NAME)
         task.description = "Sets default configuration values for the extension."
         task.group = GROUP
@@ -74,7 +74,7 @@ class MacAppBundlePlugin implements Plugin<Project> {
         return task
     }
 
-    private static Task addCreateInfoPlistTask(Project project) {
+    private static Task infoPlistTask(Project project) {
         Task task = project.tasks.create(TASK_INFO_PLIST_GENERATE_NAME, GenerateInfoPlistTask)
         task.description = "Creates the Info.plist configuration file inside the mac osx .app directory."
         task.group = GROUP
@@ -84,7 +84,7 @@ class MacAppBundlePlugin implements Plugin<Project> {
         return task
     }
 
-    private static Task addCopyToLibTask(Project project) {
+    private static Task copyToLibTask(Project project) {
         Sync task = project.tasks.create(TASK_LIB_COPY_NAME, Sync)
         task.description = "Copies the project dependency jars in the Contents/Resorces/Java directory."
         task.group = GROUP
@@ -93,7 +93,7 @@ class MacAppBundlePlugin implements Plugin<Project> {
         return task
     }
 
-    private static Task addCopyJavaAppLauncherTask(Project project) {
+    private static Task copyJavaAppLauncherTask(Project project) {
         Task task = project.tasks.create(TASK_COPY_JAVA_APP_LAUNCHER_NAME, CopyJavaAppLauncherTask)
         task.description = "Copies the JavaAppLauncher into the Contents/MacOS directory."
         task.group = GROUP
@@ -103,7 +103,7 @@ class MacAppBundlePlugin implements Plugin<Project> {
         return task
     }
 
-    private static Task addCopyIconTask(Project project) {
+    private static Task copyIconTask(Project project) {
         Task task = project.tasks.create(TASK_COPY_ICON_NAME, Copy)
         task.description = "Copies the icon into the Contents/MacOS directory."
         task.group = GROUP
@@ -112,7 +112,24 @@ class MacAppBundlePlugin implements Plugin<Project> {
         return task
     }
 
-    private static Task createPkgInfoTask(Project project) {
+    private static Task copyJavaRuntimeTask(Project project) {
+        Task task = project.tasks.create(TASK_COPY_JAVA_RUNTIME, Copy)
+        task.description = "Copies the java runtime into the Contents/Resources directory."
+        task.group = GROUP
+        task.from "${-> JRE_HOME}"
+        task.into "${-> project.buildDir}/${-> project.macAppBundle.appOutputDir}/${-> project.macAppBundle.appName}.app/Contents/Resources/Jre"
+        task.exclude "bin/",
+                "lib/deploy/",
+                "lib/deploy.jar",
+                "lib/javaws.jar",
+                "lib/libdeploy.dylib",
+                "lib/libnpjp2.dylib",
+                "lib/plugin.jar",
+                "lib/security/javaws.policy"
+        return task
+    }
+
+    private static Task pkgInfoTask(Project project) {
         Task task = project.tasks.create(TASK_PKG_INFO_GENERATE_NAME, PkgInfoTask)
         task.description = "Creates the Info.plist configuration file inside the mac osx .app directory."
         task.group = GROUP
@@ -121,7 +138,7 @@ class MacAppBundlePlugin implements Plugin<Project> {
         return task
     }
 
-    private static Task addSetFileTask(Project project) {
+    private static Task setFileTask(Project project) {
         def task = project.tasks.create(TASK_SET_FILE_NAME, Exec)
         task.description = "Runs SetFile to toggle the magic bit on the .app (probably not needed)"
         task.group = GROUP
@@ -134,7 +151,7 @@ class MacAppBundlePlugin implements Plugin<Project> {
         return task
     }
 
-    private static Task addCodeSignTask(Project project) {
+    private static Task codeSignTask(Project project) {
         def task = project.tasks.create(TASK_CODE_SIGN_NAME, Exec)
         task.description = "Runs codesign on the .app (not required)"
         task.group = GROUP
@@ -153,7 +170,7 @@ class MacAppBundlePlugin implements Plugin<Project> {
         return task
     }
 
-    private static Task addDmgTask(Project project) {
+    private static Task dmgTask(Project project) {
         def task = project.tasks.create(TASK_CREATE_DMG, Exec)
         task.description = "Create a dmg containing the .app"
         task.group = GROUP
@@ -173,7 +190,7 @@ class MacAppBundlePlugin implements Plugin<Project> {
         return task
     }
 
-    private static Task addCreateAppTask(Project project) {
+    private static Task appTask(Project project) {
         def task = project.tasks.create(TASK_CREATE_APP_NAME)
         task.description = "Placeholder task for tasks relating to creating .app applications"
         task.group = GROUP

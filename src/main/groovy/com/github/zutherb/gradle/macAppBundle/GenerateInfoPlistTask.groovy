@@ -70,17 +70,12 @@ class GenerateInfoPlistTask  extends DefaultTask {
                             doValue(xml, v)
                         }
                     }
-                    extension.javaExtras.each { k, v->
-                        key("$k")
-                        doValue(xml, v)
-                    }
+                    key('Runtime')
+                    string('$JAVAROOT/Jre')
                 }
                 extension.bundleExtras.each { k, v->
                     key("$k")
                     doValue(xml, v)
-                }
-                if (extension.extras != null) {
-                    xml.getPrinter().with { p -> p.println(extension.extras) }
                 }
             }
         }

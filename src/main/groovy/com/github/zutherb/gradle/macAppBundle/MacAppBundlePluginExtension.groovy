@@ -1,11 +1,6 @@
 package com.github.zutherb.gradle.macAppBundle
 
-import java.io.File
-
-import org.gradle.api.GradleException
-import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
-
 
 class MacAppBundlePluginExtension implements Serializable {
 
@@ -14,11 +9,11 @@ class MacAppBundlePluginExtension implements Serializable {
      * @param project
      */
     void configureDefaults(Project project) {
-        if (appName == null) appName = "${->project.name}"
-        if (volumeName == null) volumeName = "${->project.name}-${->project.version}"
-        if (dmgName == null) dmgName = "${->project.name}-${->project.version}"
-        if (jvmVersion == null) jvmVersion = project.targetCompatibility.toString()+"+"
-        if (dmgOutputDir == null) dmgOutputDir = "${->project.distsDirName}"
+        if (appName == null) appName = "${-> project.name}"
+        if (volumeName == null) volumeName = "${-> project.name}-${-> project.version}"
+        if (dmgName == null) dmgName = "${-> project.name}-${-> project.version}"
+        if (jvmVersion == null) jvmVersion = project.targetCompatibility.toString() + "+"
+        if (dmgOutputDir == null) dmgOutputDir = "${-> project.distsDirName}"
     }
 
     /** The command SetFile, usually located in /usr/bin, but might be in /Developer/Tools,
@@ -26,19 +21,6 @@ class MacAppBundlePluginExtension implements Serializable {
      *  This does not seem to be required to generate a recognizable .app application.
      */
     String setFileCmd = "/usr/bin/SetFile"
-
-    /** The output directory for building the app. WARNING: Replaced by new appOutputDir. */
-    String outputDir = null
-
-    @Deprecated
-    def setOutputDir(String val) {
-        System.err.println("outputDir is deprecated, please use appOutputDir or dmgOutputDir")
-        appOutputDir = val;
-    }
-    @Deprecated
-    def getOutputDir() {
-        throw new InvalidUserDataException("outputDir is deprecated, please use appOutputDir");
-    }
 
     /** The output directory for building the app, relative to the build directory. */
     String appOutputDir = "macApp"
@@ -70,32 +52,20 @@ class MacAppBundlePluginExtension implements Serializable {
     /** The base name of the dmg file, without the .dmg extension. */
     String dmgName
 
+    /** The path of the java runtime that should be used to execute the app */
+    String runtimeDir = ""
+
     /** Map of properties to be put in the Properties dict inside the Java dict. Usage should be like
-        javaProperties.put("apple.laf.useScreenMenuBar", "true") */
-    Map javaProperties = ["apple.laf.useScreenMenuBar" : "true"]
+     javaProperties.put("apple.laf.useScreenMenuBar", "true") */
+    Map javaProperties = [:]
 
     /** Map of extra java key-value pairs to be put in the java level dict inside Info.plist. Usage should be like
-        javaExtras.put("mykey", "myvalue") */
+     javaExtras.put("mykey", "myvalue") */
     Map javaExtras = [:]
 
     /** Map of extra bundle key-value pairs to be put in the top level dict inside Info.plist. Usage should be like
-        bundleExtras.put("mykey", "myvalue") */
+     bundleExtras.put("mykey", "myvalue") */
     Map bundleExtras = [:]
-
-    /** Should the app use the Mac default of a single screen menubar (true) or a menubar per window (false).
-     * Default is true. Deprecated, use javaProperties.put("apple.laf.useScreenMenuBar", "true")
-     */
-    boolean useScreenMenuBar = true
-
-    @Deprecated
-    def setUseScreenMenuBar(String val) {
-        System.err.println("useScreenMenuBar is deprecated, please use javaProperties.[\"apple.laf.useScreenMenuBar\"]")
-        javaProperties["apple.laf.useScreenMenuBar"] = val;
-    }
-    @Deprecated
-    def getUseScreenMenuBar() {
-        throw new InvalidUserDataException("useScreenMenuBar is deprecated, please use javaProperties.[\"apple.laf.useScreenMenuBar\"]");
-    }
 
     /** The name of the executable run by the bundle.
      * Default is 'JavaApplicationStub'.
@@ -116,24 +86,6 @@ class MacAppBundlePluginExtension implements Serializable {
      */
     String bundleDevelopmentRegion = 'English'
 
-    /** WARNING: Deprecated, use bundleProperties instead. Any extra xml that should be included in the info.plist file. Will be added
-     *  to the bottom inside the outermost <dict> element.
-     */
-    String extras = ""
-
-    @Deprecated
-    def setExtras(String val) {
-        System.err.println("extras is deprecated, please use the bundleExtras map instead.")
-        extras = val
-    }
-    @Deprecated
-    def getExtras() {
-        if (extras != null) {
-            System.err.println("extras is deprecated, please use the bundleExtras map instead.")
-        }
-        return extras
-    }
-
     /** for codesign */
     String certIdentity = null
 
@@ -150,7 +102,6 @@ class MacAppBundlePluginExtension implements Serializable {
     public File getPkgInfoFileForProject(Project project) {
         return project.file("${project.buildDir}/${appOutputDir}/${appName}.app/Contents/PkgInfo")
     }
-
 
     @Override
     public int hashCode() {
@@ -190,7 +141,7 @@ class MacAppBundlePluginExtension implements Serializable {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        MacAppBundlePluginExtension other = (MacAppBundlePluginExtension)obj;
+        MacAppBundlePluginExtension other = (MacAppBundlePluginExtension) obj;
         if (creatorCode == null) {
             if (other.creatorCode != null)
                 return false;
@@ -299,13 +250,6 @@ class MacAppBundlePluginExtension implements Serializable {
                 return false;
         } else if (!bundleExtras.equals(other.bundleExtras))
             return false;
-        if (extras == null) {
-            if (other.extras != null)
-                return false;
-        } else if (!extras.equals(other.extras))
-            return false;
         return true;
     }
-
-
 }
