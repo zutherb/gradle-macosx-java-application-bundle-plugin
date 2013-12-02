@@ -16,7 +16,8 @@ There are 8 tasks:
 * generatePlist - creates the Info.plist file
 * generatePkgInfo - create the PkgInfo file
 * copyToResourcesJava - copies the jars into the .app
-* copyStub - copies the stub used to start Java to the .app
+* copyJavaAppLauncher - copies the JavaAppLauncher used to start Java to the .app
+* copyJavaRuntime - copies the Java Runtime used to start the .app
 * runSetFile - runs SetFile to toggle the magic bit (not run by default)
 * createApp - empty task that depends on the above
 * codeSign - digital signature using codesign
@@ -37,7 +38,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.github.zutherb:macappbundle:0.1'
+        classpath 'com.github.zutherb.gradle:gradle-macappbundle:0.1'
     }
 }
 ```
